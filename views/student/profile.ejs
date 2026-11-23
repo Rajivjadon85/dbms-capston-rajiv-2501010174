@@ -1,0 +1,83 @@
+<%- include('../layouts/header') %>
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-person-circle text-primary me-2"></i>My Student Profile</h2>
+        <p class="text-muted mb-0 small">Account information, academic details, and security settings</p>
+    </div>
+</div>
+
+<div class="row g-4 justify-content-center">
+    <!-- Student Information Card -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4 bg-white h-100">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle p-3 mb-2" style="width: 70px; height: 70px;">
+                    <i class="bi bi-mortarboard fs-2"></i>
+                </div>
+                <h4 class="fw-bold mb-0 text-dark"><%= student.full_name %></h4>
+                <span class="badge bg-light text-primary border fs-6 mt-1"><%= student.roll_number %></span>
+            </div>
+
+            <ul class="list-group list-group-flush small">
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted"><i class="bi bi-building me-2"></i>Department</span>
+                    <strong class="text-dark"><%= student.department %></strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted"><i class="bi bi-calendar3 me-2"></i>Semester</span>
+                    <strong class="text-dark">Semester <%= student.semester %> (2nd Year)</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email</span>
+                    <strong class="text-dark"><%= student.email %></strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted"><i class="bi bi-telephone me-2"></i>Mobile</span>
+                    <strong class="text-dark"><%= student.phone || 'Not provided' %></strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted"><i class="bi bi-shield-check me-2"></i>Library Status</span>
+                    <span class="badge <%= student.status === 'Active' ? 'bg-success' : 'bg-danger' %>">
+                        <%= student.status %>
+                    </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted"><i class="bi bi-clock me-2"></i>Member Since</span>
+                    <span class="text-muted"><%= new Date(student.created_at).toLocaleDateString() %></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4 bg-white h-100">
+            <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock text-primary me-2"></i>Update Security Password</h5>
+            <p class="text-muted small mb-4">Ensure your password is at least 6 characters long to secure your borrowing account.</p>
+
+            <form action="/student/change-password" method="POST">
+                <div class="mb-3">
+                    <label for="current_password" class="form-label">Current Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" id="current_password" name="current_password" placeholder="••••••••" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">New Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" id="new_password" name="new_password" placeholder="At least 6 characters" minlength="6" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirm_password" class="form-label">Confirm New Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Re-type new password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                    <i class="bi bi-key-fill me-1"></i> Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

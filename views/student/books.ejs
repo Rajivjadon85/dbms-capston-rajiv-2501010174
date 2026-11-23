@@ -1,0 +1,123 @@
+<%- include('../layouts/header') %>
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-search text-primary me-2"></i>Browse Library Catalog</h2>
+        <p class="text-muted mb-0 small">Search textbooks, reference materials, and check shelf availability</p>
+    </div>
+</div>
+
+<!-- Search & Category Filters -->
+<div class="card card-custom p-3 mb-4 bg-white">
+    <form action="/student/books" method="GET" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="search" value="<%= searchQuery %>" placeholder="Search by title, author name, or ISBN...">
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <select class="form-select" name="category">
+                <option value="all">All Academic Categories</option>
+                <% categories.forEach(cat => { %>
+                    <option value="<%= cat.category_id %>" <%= selectedCategory == cat.category_id ? 'selected' : '' %>>
+                        <%= cat.category_name %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-funnel me-1"></i> Filter
+            </button>
+            <a href="/student/books" class="btn btn-outline-secondary" title="Reset Filters">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Books Grid / Table -->
+<div class="card card-custom p-3 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0 text-muted">Found <%= books.length %> Titles in Library</h6>
+        <div style="max-width: 250px;">
+            <input type="text" id="tableQuickSearch" class="form-control form-control-sm" placeholder="Quick filter table...">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom align-middle searchable-table">
+            <thead>
+                <tr>
+                    <th>Title & ISBN</th>
+                    <th>Author(s)</th>
+                    <th>Category</th>
+                    <th>Publisher & Year</th>
+                    <th class="text-center">Availability Status</th>
+                    <th>Shelf Location</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (books && books.length > 0) { %>
+                    <% books.forEach(book => { %>
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark"><%= book.title %></div>
+                                <small class="text-muted"><i class="bi bi-upc-scan me-1"></i><%= book.isbn %></small>
+                            </td>
+                            <td><%= book.author %></td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <%= book.category_name %>
+                                </span>
+                            </td>
+                            <td class="text-muted small">
+                                <%= book.publisher || 'N/A' %> (<%= book.publish_year || 'N/A' %>)
+                            </td>
+                            <td class="text-center">
+                                <% if (book.available_copies > 0) { %>
+                                    <span class="badge badge-available">
+                                        <i class="bi bi-check2-circle me-1"></i> Available (<%= book.available_copies %> of <%= book.total_copies %>)
+                                    </span>
+                                <% } else { %>
+                                    <span class="badge badge-out-of-stock">
+                                        <i class="bi bi-x-circle me-1"></i> Out of Stock (0 of <%= book.total_copies %>)
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-secondary border">
+                                    <i class="bi bi-geo-alt me-1"></i><%= book.shelf_location || 'Rack-B1' %>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <% if (book.available_copies > 0) { %>
+                                    <form action="/student/borrow/<%= book.book_id %>" method="POST" class="d-inline" onsubmit="return confirm('Do you want to borrow this book for 14 days?');">
+                                        <button type="submit" class="btn btn-sm btn-primary fw-semibold shadow-sm">
+                                            <i class="bi bi-box-arrow-down me-1"></i> Borrow
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>Unavailable</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-search fs-2 d-block mb-2"></i>
+                            No books matched your search query.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

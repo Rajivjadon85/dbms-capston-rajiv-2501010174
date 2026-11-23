@@ -1,0 +1,175 @@
+<%- include('layouts/header') %>
+
+<!-- Hero Banner -->
+<div class="hero-banner p-4 p-md-5 mb-4 text-center rounded-3">
+    <div class="container py-2">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold mb-3">
+            <i class="bi bi-mortarboard-fill me-1"></i> B.Tech CSE DBMS Project
+        </span>
+        <h1 class="display-5 fw-bold mb-3">College Library Management System</h1>
+        <p class="col-md-8 mx-auto fs-5 text-light opacity-90 mb-4">
+            A comprehensive, relational database-backed library management platform supporting book cataloging, student lending, automated overdue tracking, and ACID-compliant transactions.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <% if (!currentUser) { %>
+                <a href="/auth/login?tab=student" class="btn btn-warning btn-lg px-4 fw-semibold">
+                    <i class="bi bi-person-fill me-2"></i>Student Portal
+                </a>
+                <a href="/auth/login?tab=admin" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-shield-lock-fill me-2"></i>Librarian Login
+                </a>
+            <% } else if (currentUser.role === 'admin') { %>
+                <a href="/admin/dashboard" class="btn btn-warning btn-lg px-4 fw-semibold">
+                    <i class="bi bi-speedometer2 me-2"></i>Go to Admin Dashboard
+                </a>
+                <a href="/admin/issue" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-box-arrow-up-right me-2"></i>Issue a Book
+                </a>
+            <% } else { %>
+                <a href="/student/dashboard" class="btn btn-warning btn-lg px-4 fw-semibold">
+                    <i class="bi bi-speedometer2 me-2"></i>My Student Dashboard
+                </a>
+                <a href="/student/books" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-search me-2"></i>Browse Catalog
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics Row -->
+<div class="row g-3 mb-5">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-primary">
+            <div>
+                <div class="stat-number"><%= stats.total_books || 0 %></div>
+                <div class="stat-label">Total Titles</div>
+            </div>
+            <div class="stat-icon">
+                <i class="bi bi-book"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-success">
+            <div>
+                <div class="stat-number"><%= stats.available_copies || 0 %></div>
+                <div class="stat-label">Available Copies</div>
+            </div>
+            <div class="stat-icon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-info">
+            <div>
+                <div class="stat-number"><%= stats.categories || 0 %></div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-icon">
+                <i class="bi bi-tags"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-warning">
+            <div>
+                <div class="stat-number"><%= stats.students || 0 %></div>
+                <div class="stat-label">Registered Students</div>
+            </div>
+            <div class="stat-icon">
+                <i class="bi bi-people"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Book Catalog Preview -->
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-journal-text me-2 text-primary"></i>Catalog Highlights</h2>
+        <p class="text-muted mb-0 small">Preview of core engineering textbooks available in the library repository</p>
+    </div>
+    <% if (currentUser && currentUser.role === 'student') { %>
+        <a href="/student/books" class="btn btn-outline-primary btn-sm">View All Books <i class="bi bi-arrow-right ms-1"></i></a>
+    <% } else if (currentUser && currentUser.role === 'admin') { %>
+        <a href="/admin/books" class="btn btn-outline-primary btn-sm">Manage All Books <i class="bi bi-arrow-right ms-1"></i></a>
+    <% } else { %>
+        <a href="/auth/login?tab=student" class="btn btn-outline-primary btn-sm">Login to Search <i class="bi bi-arrow-right ms-1"></i></a>
+    <% } %>
+</div>
+
+<div class="row g-4 mb-5">
+    <% if (featuredBooks && featuredBooks.length > 0) { %>
+        <% featuredBooks.forEach(book => { %>
+            <div class="col-lg-4 col-md-6">
+                <div class="card card-custom h-100 p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-light text-primary border">
+                            <%= book.category_name %>
+                        </span>
+                        <% if (book.available_copies > 0) { %>
+                            <span class="badge badge-available">
+                                <i class="bi bi-check2"></i> <%= book.available_copies %> in stock
+                            </span>
+                        <% } else { %>
+                            <span class="badge badge-out-of-stock">
+                                <i class="bi bi-x-circle"></i> Out of stock
+                            </span>
+                        <% } %>
+                    </div>
+                    <h5 class="card-title fw-bold text-dark mb-1"><%= book.title %></h5>
+                    <p class="card-subtitle text-muted small mb-3">
+                        <i class="bi bi-person me-1"></i><%= book.author %>
+                    </p>
+                    <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center small text-secondary">
+                        <span><i class="bi bi-upc-scan me-1"></i><%= book.isbn %></span>
+                        <span><i class="bi bi-geo-alt me-1"></i><%= book.shelf_location || 'General' %></span>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="col-12">
+            <div class="alert alert-info text-center py-4">
+                <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                <h5>No books loaded yet</h5>
+                <p class="text-muted small mb-0">Run <code>npm run init-db</code> to initialize the MySQL database and seed sample books.</p>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- DBMS Architectural Highlights Section -->
+<div class="card card-custom bg-white p-4 mb-4">
+    <h4 class="fw-bold mb-3"><i class="bi bi-cpu text-primary me-2"></i>DBMS Principles Demonstrated</h4>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded-3 h-100">
+                <h6 class="fw-bold text-primary"><i class="bi bi-diagram-3 me-2"></i>3NF & BCNF Design</h6>
+                <p class="small text-muted mb-0">Normalized relational schema eliminating update, insertion, and deletion anomalies.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded-3 h-100">
+                <h6 class="fw-bold text-success"><i class="bi bi-lock me-2"></i>ACID Transactions</h6>
+                <p class="small text-muted mb-0">Book issues and returns wrapped in transactional locks (<code>FOR UPDATE</code>) with automatic rollback.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded-3 h-100">
+                <h6 class="fw-bold text-danger"><i class="bi bi-shield-check me-2"></i>SQL Injection Defense</h6>
+                <p class="small text-muted mb-0">100% prepared statements with parameterized inputs preventing SQL injection attacks.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded-3 h-100">
+                <h6 class="fw-bold text-warning"><i class="bi bi-lightning-charge me-2"></i>Triggers & Views</h6>
+                <p class="small text-muted mb-0">Automated audit logging triggers and pre-computed views for active issues and inventory status.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('layouts/footer') %>

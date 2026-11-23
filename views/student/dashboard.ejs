@@ -1,0 +1,164 @@
+<%- include('../layouts/header') %>
+
+<!-- Student Dashboard Header -->
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-speedometer2 text-primary me-2"></i>Student Dashboard</h2>
+        <p class="text-muted mb-0 small">
+            Welcome, <strong><%= user.name %></strong> &bull; Roll No: <strong><%= user.roll_number %></strong> &bull; <%= user.department %> (Sem <%= user.semester %>)
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/student/books" class="btn btn-primary btn-sm">
+            <i class="bi bi-search me-1"></i> Browse Books
+        </a>
+        <a href="/student/my-issues" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-journal-check me-1"></i> My Borrowed Books
+        </a>
+    </div>
+</div>
+
+<!-- Student Metrics Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-primary">
+            <div>
+                <div class="stat-number"><%= metrics.currently_issued || 0 %></div>
+                <div class="stat-label">Currently Holding</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-book"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-danger">
+            <div>
+                <div class="stat-number"><%= metrics.overdue_count || 0 %></div>
+                <div class="stat-label">Overdue Books</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-success">
+            <div>
+                <div class="stat-number"><%= metrics.total_returned || 0 %></div>
+                <div class="stat-label">Books Returned</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-warning">
+            <div>
+                <div class="stat-number">₹<%= parseFloat(metrics.total_fines || 0).toFixed(2) %></div>
+                <div class="stat-label">Fines Assessed</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Books & Recommended Books Row -->
+<div class="row g-4">
+    <!-- Active Issued Books -->
+    <div class="col-lg-8">
+        <div class="card card-custom h-100 p-3 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>My Currently Issued Books
+                </h5>
+                <a href="/student/my-issues" class="btn btn-sm btn-link text-decoration-none">Full History &rarr;</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Location</th>
+                            <th>Status / Fine</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (activeIssues && activeIssues.length > 0) { %>
+                            <% activeIssues.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark"><%= item.book_title %></div>
+                                        <small class="text-muted"><%= item.author %> &bull; ISBN: <%= item.isbn %></small>
+                                    </td>
+                                    <td><%= item.issue_date %></td>
+                                    <td>
+                                        <div><%= item.due_date %></div>
+                                        <% if (item.is_overdue) { %>
+                                            <small class="text-danger fw-bold"><%= item.days_difference %> days late</small>
+                                        <% } else { %>
+                                            <small class="text-muted"><%= Math.abs(item.days_difference) %> days remaining</small>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">
+                                            <i class="bi bi-geo-alt me-1"></i><%= item.shelf_location || 'General' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (item.is_overdue) { %>
+                                            <span class="badge badge-overdue">Overdue</span>
+                                            <div class="text-danger small fw-bold">Est: ₹<%= item.estimated_fine %></div>
+                                        <% } else { %>
+                                            <span class="badge badge-issued">Issued</span>
+                                            <div class="text-success small">No fine</div>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="bi bi-journal-check fs-2 d-block mb-2 text-success"></i>
+                                    You currently have no books issued. Ready to borrow!
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommended Books Sidebar -->
+    <div class="col-lg-4">
+        <div class="card card-custom h-100 p-3 bg-white">
+            <h5 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-2"></i>Recommended for CSE</h5>
+            <p class="text-muted small mb-3">Popular textbooks available on the library shelves:</p>
+
+            <ul class="list-group list-group-flush">
+                <% if (popularBooks && popularBooks.length > 0) { %>
+                    <% popularBooks.forEach(b => { %>
+                        <li class="list-group-item px-0 py-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-0 text-truncate" style="max-width: 190px;"><%= b.title %></h6>
+                                    <small class="text-muted"><%= b.author %></small>
+                                </div>
+                                <span class="badge badge-available">
+                                    <%= b.available_copies %> in stock
+                                </span>
+                            </div>
+                        </li>
+                    <% }) %>
+                <% } %>
+            </ul>
+
+            <div class="mt-auto pt-3 border-top text-center">
+                <a href="/student/books" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-search me-1"></i> Search Full Catalog
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

@@ -1,0 +1,86 @@
+<%- include('../layouts/header') %>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-custom p-4 shadow-sm bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <h3 class="fw-bold text-dark mb-0">
+                    <i class="bi <%= action === 'add' ? 'bi-plus-circle-fill text-primary' : 'bi-pencil-square text-secondary' %> me-2"></i>
+                    <%= action === 'add' ? 'Add New Book to Catalog' : 'Edit Book Catalog Entry' %>
+                </h3>
+                <a href="/admin/books" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Books
+                </a>
+            </div>
+
+            <form action="<%= action === 'add' ? '/admin/books/add' : '/admin/books/edit/' + book.book_id %>" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="isbn" class="form-label">ISBN Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="isbn" name="isbn" value="<%= book ? book.isbn : '' %>" placeholder="e.g. 978-0078022159" required>
+                        <small class="text-muted">Unique 10 or 13-digit identifier</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="category_id" class="form-label">Academic Category <span class="text-danger">*</span></label>
+                        <select class="form-select" id="category_id" name="category_id" required>
+                            <option value="">-- Select Category --</option>
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat.category_id %>" <%= book && book.category_id == cat.category_id ? 'selected' : '' %>>
+                                    <%= cat.category_name %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="title" class="form-label">Book Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" value="<%= book ? book.title : '' %>" placeholder="e.g. Database System Concepts" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="author" class="form-label">Author(s) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="author" name="author" value="<%= book ? book.author : '' %>" placeholder="e.g. Abraham Silberschatz, Henry F. Korth" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="publisher" class="form-label">Publisher</label>
+                        <input type="text" class="form-control" id="publisher" name="publisher" value="<%= book ? (book.publisher || '') : '' %>" placeholder="e.g. McGraw-Hill Education">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="publish_year" class="form-label">Publication Year</label>
+                        <input type="number" class="form-control" id="publish_year" name="publish_year" value="<%= book ? (book.publish_year || '') : '' %>" placeholder="e.g. 2020" min="1900" max="2099">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="total_copies" class="form-label">Total Inventory Copies <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="total_copies" name="total_copies" value="<%= book ? book.total_copies : 1 %>" min="1" required>
+                        <% if (action === 'edit') { %>
+                            <small class="text-muted">
+                                Currently available: <strong><%= book.available_copies %></strong>, 
+                                Issued: <strong><%= book.total_copies - book.available_copies %></strong>
+                            </small>
+                        <% } else { %>
+                            <small class="text-muted">All copies will initially be marked available</small>
+                        <% } %>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="shelf_location" class="form-label">Shelf / Rack Location</label>
+                        <input type="text" class="form-control" id="shelf_location" name="shelf_location" value="<%= book ? (book.shelf_location || '') : 'Rack-B1-01' %>" placeholder="e.g. Rack-B1-01">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                    <a href="/admin/books" class="btn btn-light px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="bi bi-save me-1"></i> <%= action === 'add' ? 'Save Book Entry' : 'Update Book Entry' %>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

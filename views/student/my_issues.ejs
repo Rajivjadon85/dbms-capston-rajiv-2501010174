@@ -1,0 +1,168 @@
+<%- include('../layouts/header') %>
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-journal-bookmark text-primary me-2"></i>My Borrowed Books & Circulation History</h2>
+        <p class="text-muted mb-0 small">Keep track of your current book loans, due dates, and completed returns</p>
+    </div>
+</div>
+
+<!-- Fine Policy Alert Banner -->
+<div class="alert alert-info border d-flex align-items-center mb-4 p-3 shadow-sm" role="alert">
+    <i class="bi bi-info-circle-fill fs-4 me-3 text-primary"></i>
+    <div>
+        <strong class="text-dark">14-Day Lending & Fine Policy:</strong>
+        <span class="text-secondary d-block small">
+            Books are issued for <strong>14 days without any charge</strong>. If returned after 14 days (post due date), a late fee penalty of <strong>₹5.00 per day</strong> is automatically calculated and recorded.
+        </span>
+    </div>
+</div>
+
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4" id="issuesTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-semibold" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-loans" type="button" role="tab" aria-controls="active-loans" aria-selected="true">
+            <i class="bi bi-book-half me-1"></i> Active Loans (<%= activeLoans.length %>)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-semibold" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-loans" type="button" role="tab" aria-controls="history-loans" aria-selected="false">
+            <i class="bi bi-clock-history me-1"></i> Past History (<%= borrowingHistory.length %>)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="issuesTabContent">
+    <!-- Active Loans Tab -->
+    <div class="tab-pane fade show active" id="active-loans" role="tabpanel" aria-labelledby="active-tab">
+        <div class="card card-custom p-3 bg-white">
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Book Title & Details</th>
+                            <th>Issue Date</th>
+                            <th>Due Date (14 Days)</th>
+                            <th>Shelf Location</th>
+                            <th>Loan Status</th>
+                            <th>Fine Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (activeLoans && activeLoans.length > 0) { %>
+                            <% activeLoans.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark"><%= item.book_title %></div>
+                                        <small class="text-muted"><%= item.author %> &bull; ISBN: <%= item.isbn %></small>
+                                        <% if (item.remarks) { %>
+                                            <div class="text-secondary small fst-italic"><%= item.remarks %></div>
+                                        <% } %>
+                                    </td>
+                                    <td><%= item.issue_date %></td>
+                                    <td>
+                                        <div><%= item.due_date %></div>
+                                        <% if (item.is_overdue) { %>
+                                            <small class="text-danger fw-bold"><%= item.days_difference %> day(s) overdue</small>
+                                        <% } else { %>
+                                            <small class="text-success"><%= Math.abs(item.days_difference) %> days left</small>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">
+                                            <i class="bi bi-geo-alt me-1"></i><%= item.shelf_location || 'General' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (item.is_overdue) { %>
+                                            <span class="badge badge-overdue">Overdue</span>
+                                        <% } else { %>
+                                            <span class="badge badge-issued">Active Loan</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (item.is_overdue) { %>
+                                            <span class="text-danger fw-bold">₹<%= item.estimated_fine %></span>
+                                            <small class="d-block text-danger">(₹5/day late fee)</small>
+                                        <% } else { %>
+                                            <span class="text-success small fw-semibold">₹0.00 (Free)</span>
+                                            <small class="d-block text-muted">Within 14 days</small>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-end">
+                                        <form action="/student/return/<%= item.issue_id %>" method="POST" class="d-inline" onsubmit="return confirm('<%= item.is_overdue ? `Confirm return of this overdue book? A late fee of Rs ${item.estimated_fine} will be applied.` : `Confirm return of this book on time? (Rs 0.00 fine)` %>');">
+                                            <button type="submit" class="btn btn-sm <%= item.is_overdue ? 'btn-outline-danger' : 'btn-outline-success' %> fw-semibold">
+                                                <i class="bi bi-arrow-return-left me-1"></i> Return Book
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="bi bi-check-circle fs-3 d-block text-success mb-2"></i>
+                                    You have no currently active book issues.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Past History Tab -->
+    <div class="tab-pane fade" id="history-loans" role="tabpanel" aria-labelledby="history-tab">
+        <div class="card card-custom p-3 bg-white">
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Return Date</th>
+                            <th>Fine Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (borrowingHistory && borrowingHistory.length > 0) { %>
+                            <% borrowingHistory.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark"><%= item.book_title %></div>
+                                        <small class="text-muted">ISBN: <%= item.isbn %></small>
+                                    </td>
+                                    <td><%= item.issue_date %></td>
+                                    <td><%= item.due_date %></td>
+                                    <td><span class="text-success fw-semibold"><%= item.return_date %></span></td>
+                                    <td>
+                                        <% if (parseFloat(item.fine_amount) > 0) { %>
+                                            <span class="text-danger fw-bold">₹<%= parseFloat(item.fine_amount).toFixed(2) %></span>
+                                        <% } else { %>
+                                            <span class="text-muted">₹0.00</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-returned">Returned</span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No past borrowing history records found.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

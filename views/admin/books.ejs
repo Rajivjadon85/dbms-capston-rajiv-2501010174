@@ -1,0 +1,135 @@
+<%- include('../layouts/header') %>
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-journals text-primary me-2"></i>Book Inventory Management</h2>
+        <p class="text-muted mb-0 small">Catalog management, stock levels, and shelf allocations</p>
+    </div>
+    <a href="/admin/books/add" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Add New Book
+    </a>
+</div>
+
+<!-- Search & Filter Controls -->
+<div class="card card-custom p-3 mb-4 bg-white">
+    <form action="/admin/books" method="GET" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="search" value="<%= searchQuery %>" placeholder="Search by Title, Author, or ISBN...">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <select class="form-select" name="category">
+                <option value="all">All Academic Categories</option>
+                <% categories.forEach(cat => { %>
+                    <option value="<%= cat.category_id %>" <%= selectedCategory == cat.category_id ? 'selected' : '' %>>
+                        <%= cat.category_name %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select class="form-select" name="availability">
+                <option value="all" <%= selectedAvailability === 'all' ? 'selected' : '' %>>All Availability</option>
+                <option value="available" <%= selectedAvailability === 'available' ? 'selected' : '' %>>Available In-Stock</option>
+                <option value="out" <%= selectedAvailability === 'out' ? 'selected' : '' %>>Out of Stock</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+            <a href="/admin/books" class="btn btn-outline-secondary" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
+        </div>
+    </form>
+</div>
+
+<!-- Books Catalog Table -->
+<div class="card card-custom p-3 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0 text-muted">Showing <%= books.length %> Book Titles</h6>
+        <div style="max-width: 250px;">
+            <input type="text" id="tableQuickSearch" class="form-control form-control-sm" placeholder="Quick filter table...">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom align-middle searchable-table">
+            <thead>
+                <tr>
+                    <th>ISBN / Title</th>
+                    <th>Author & Publisher</th>
+                    <th>Category</th>
+                    <th class="text-center">Stock</th>
+                    <th>Location</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (books && books.length > 0) { %>
+                    <% books.forEach(book => { %>
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark"><%= book.title %></div>
+                                <small class="text-muted"><i class="bi bi-upc-scan me-1"></i><%= book.isbn %></small>
+                            </td>
+                            <td>
+                                <div><%= book.author %></div>
+                                <small class="text-muted"><%= book.publisher || 'N/A' %> (<%= book.publish_year || 'N/A' %>)</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <%= book.category_name %>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <% if (book.available_copies > 0) { %>
+                                    <span class="badge badge-available">
+                                        <%= book.available_copies %> / <%= book.total_copies %> Avail
+                                    </span>
+                                <% } else { %>
+                                    <span class="badge badge-out-of-stock">
+                                        0 / <%= book.total_copies %> Out
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-secondary border">
+                                    <i class="bi bi-geo-alt me-1"></i><%= book.shelf_location || 'Shelf-A1' %>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <% if (book.available_copies > 0) { %>
+                                        <a href="/admin/issue?book_id=<%= book.book_id %>" class="btn btn-outline-success" title="Quick Issue">
+                                            <i class="bi bi-box-arrow-up-right"></i> Issue
+                                        </a>
+                                    <% } %>
+                                    <a href="/admin/books/edit/<%= book.book_id %>" class="btn btn-outline-secondary" title="Edit Book">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="/admin/books/delete/<%= book.book_id %>" method="POST" class="d-inline confirm-delete-form" data-item-type="book">
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete Book">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            No books match the specified criteria.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

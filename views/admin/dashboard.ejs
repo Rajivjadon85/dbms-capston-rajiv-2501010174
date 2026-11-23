@@ -1,0 +1,181 @@
+<%- include('../layouts/header') %>
+
+<!-- Admin Dashboard Header -->
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-speedometer2 text-primary me-2"></i>Librarian Admin Dashboard</h2>
+        <p class="text-muted mb-0 small">Overview of library operations, circulation status, and inventory metrics</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/issue" class="btn btn-primary btn-sm">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Issue Book
+        </a>
+        <a href="/admin/books/add" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add Book
+        </a>
+    </div>
+</div>
+
+<!-- Key Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-primary">
+            <div>
+                <div class="stat-number"><%= stats.total_titles || 0 %></div>
+                <div class="stat-label">Book Titles (<%= stats.total_book_copies || 0 %> Copies)</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-book"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-success">
+            <div>
+                <div class="stat-number"><%= stats.available_copies || 0 %></div>
+                <div class="stat-label">Available on Shelves</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-info">
+            <div>
+                <div class="stat-number"><%= stats.currently_issued || 0 %></div>
+                <div class="stat-label">Currently Issued</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-arrow-left-right"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-danger">
+            <div>
+                <div class="stat-number"><%= stats.overdue_count || 0 %></div>
+                <div class="stat-label">Overdue Books</div>
+            </div>
+            <div class="stat-icon"><i class="bi bi-exclamation-octagon"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Metrics Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <div class="stat-number"><%= stats.total_students || 0 %></div>
+                <div class="stat-label">Registered Students</div>
+            </div>
+            <div class="stat-icon bg-light text-secondary"><i class="bi bi-people"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <div class="stat-number"><%= stats.total_categories || 0 %></div>
+                <div class="stat-label">Academic Categories</div>
+            </div>
+            <div class="stat-icon bg-light text-secondary"><i class="bi bi-tags"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <div class="stat-number text-success">₹<%= parseFloat(stats.fines_collected || 0).toFixed(2) %></div>
+                <div class="stat-label">Total Fines Collected</div>
+            </div>
+            <div class="stat-icon bg-light text-success"><i class="bi bi-cash-stack"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Content Grid -->
+<div class="row g-4">
+    <!-- Recent Issues Table -->
+    <div class="col-lg-8">
+        <div class="card card-custom h-100 p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Circulation Activity</h5>
+                <a href="/admin/issues" class="btn btn-sm btn-link text-decoration-none">View All Issues &rarr;</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Student</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (recentIssues && recentIssues.length > 0) { %>
+                            <% recentIssues.forEach(item => { %>
+                                <tr>
+                                    <td><strong><%= item.book_title %></strong></td>
+                                    <td>
+                                        <div><%= item.student_name %></div>
+                                        <small class="text-muted"><%= item.roll_number %></small>
+                                    </td>
+                                    <td><%= item.issue_date %></td>
+                                    <td><%= item.due_date %></td>
+                                    <td>
+                                        <% if (item.status === 'Issued') { %>
+                                            <span class="badge badge-issued">Issued</span>
+                                        <% } else if (item.status === 'Overdue') { %>
+                                            <span class="badge badge-overdue">Overdue</span>
+                                        <% } else { %>
+                                            <span class="badge badge-returned">Returned</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">No recent transaction records.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div class="col-lg-4">
+        <div class="card card-custom h-100 p-3">
+            <h5 class="fw-bold mb-3"><i class="bi bi-shield-exclamation text-warning me-2"></i>Low Stock Catalog</h5>
+            <p class="text-muted small mb-3">Books with 1 or 0 copies remaining available for checkout:</p>
+
+            <ul class="list-group list-group-flush">
+                <% if (lowStockBooks && lowStockBooks.length > 0) { %>
+                    <% lowStockBooks.forEach(b => { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                            <div>
+                                <h6 class="mb-0 text-truncate" style="max-width: 200px;"><%= b.title %></h6>
+                                <small class="text-muted"><%= b.author %></small>
+                            </div>
+                            <div>
+                                <% if (b.available_copies === 0) { %>
+                                    <span class="badge bg-danger">0 left</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning text-dark"><%= b.available_copies %> left</span>
+                                <% } %>
+                            </div>
+                        </li>
+                    <% }) %>
+                <% } else { %>
+                    <li class="list-group-item text-center text-muted py-3 px-0">All books have healthy stock levels.</li>
+                <% } %>
+            </ul>
+
+            <div class="mt-auto pt-3 border-top text-center">
+                <a href="/admin/books" class="btn btn-outline-secondary btn-sm w-100">
+                    <i class="bi bi-journals me-1"></i> Review Full Inventory
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>
