@@ -44,11 +44,6 @@ library-management-system/
 │   ├── library_db.sql               # MySQL database schema, tables, views, procedures, triggers, seed data
 │   ├── dbms_syllabus_queries.sql    # Executable SQL queries covering Units 1, 2, 3, and 4
 │   └── init_db.js                   # Node.js automated database setup script
-├── docs/
-│   ├── ER_DIAGRAM.md                # Entity-Relationship diagram & normalization proof
-│   ├── PROJECT_DOCUMENTATION.md     # Comprehensive viva guide & academic documentation
-│   ├── Library_Management_System_Project_Report.pdf # Official PDF Report
-│   └── Library_Management_System_DBMS_Viva.pptx    # 14-Slide PowerPoint presentation
 ├── middleware/
 │   └── auth.js                      # Authentication & role guard middleware
 ├── public/
@@ -68,6 +63,10 @@ library-management-system/
 │   └── index.ejs                    # Landing / Home page
 ├── .env.example                     # Sample environment configuration
 ├── .gitignore                       # Git ignore rules (node_modules, .env, *.sqlite)
+├── ER_DIAGRAM.md                    # Entity-Relationship diagram & normalization proof
+├── PROJECT_DOCUMENTATION.md         # Comprehensive viva guide & academic documentation
+├── Library_Management_System_Project_Report.pdf # Official PDF Report for Portal
+├── Library_Management_System_DBMS_Viva.pptx    # 14-Slide PowerPoint presentation
 ├── package.json                     # Node.js dependencies and run scripts
 └── README.md                        # Setup and operational guide
 ```
